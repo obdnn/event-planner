@@ -26,7 +26,7 @@ You don't need to install Python or MySQL locally. Just ensure you have Docker D
 
 **1. Clone the repository:**
 ```bash
-git clone [https://github.com/YOUR_GITHUB_USERNAME/event-planner.git](https://github.com/YOUR_GITHUB_USERNAME/event-planner.git)
+git clone [https://github.com/obdnn/event-planner.git](https://github.com/obdnn/event-planner.git)
 cd event-planner
 ```
 
