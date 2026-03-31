@@ -25,6 +25,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
 
+    http_method_names = ['get', 'patch', 'delete']
+
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
 
