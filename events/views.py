@@ -8,6 +8,8 @@ from .permissions import IsOrganizer
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import EventFilter
 
 
 class UserRegisterView(rest_framework.generics.CreateAPIView):
@@ -35,36 +37,43 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOrganizer]
     queryset = Event.objects.all()
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='location', description='Filter by location', required=False, type=str),
-            OpenApiParameter(name='date', description='Filter by date. Format: YYYY-MM-DD (e.g. 2026-12-01)', required=False, type=str),
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = EventFilter
 
-    def get_queryset(self):
-        queryset = Event.objects.all()
-        location = self.request.query_params.get('location')
-        date_str = self.request.query_params.get('date')
+    # NOTE: I originally wrote this manual filter to demonstrate working with
+    # Django timezones and basic lookups. Leaving it for reference,
+    # but using django-filter above as a best practice.
 
-        if location:
-            queryset = queryset.filter(location__icontains=location)
-
-        if date_str:
-            try:
-                naive_datetime = datetime.strptime(date_str, '%Y-%m-%d')
-                aware_start = timezone.make_aware(naive_datetime)
-                aware_end = aware_start + timedelta(days=1)
-                queryset = queryset.filter(
-                    date__gte=aware_start,
-                    date__lt=aware_end
-                )
-            except ValueError:
-                pass
-
-        return queryset
+    # @extend_schema(
+    #     parameters=[
+    #         OpenApiParameter(name='location', description='Filter by location', required=False, type=str),
+    #         OpenApiParameter(name='date', description='Filter by date. Format: YYYY-MM-DD (e.g. 2026-12-01)', required=False, type=str),
+    #     ]
+    # )
+    # def list(self, request, *args, **kwargs):
+    #     return super().list(request, *args, **kwargs)
+    #
+    # def get_queryset(self):
+    #     queryset = Event.objects.all()
+    #     location = self.request.query_params.get('location')
+    #     date_str = self.request.query_params.get('date')
+    #
+    #     if location:
+    #         queryset = queryset.filter(location__icontains=location)
+    #
+    #     if date_str:
+    #         try:
+    #             naive_datetime = datetime.strptime(date_str, '%Y-%m-%d')
+    #             aware_start = timezone.make_aware(naive_datetime)
+    #             aware_end = aware_start + timedelta(days=1)
+    #             queryset = queryset.filter(
+    #                 date__gte=aware_start,
+    #                 date__lt=aware_end
+    #             )
+    #         except ValueError:
+    #             pass
+    #
+    #     return queryset
 
     def perform_create(self, serializer):
         serializer.save(organizer = self.request.user)

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'events',
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
